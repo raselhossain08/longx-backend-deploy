@@ -42,7 +42,10 @@ const documentSchema = new mongoose.Schema({
             type: String,
             required: [true, 'Please enter your rut'],
         },
-    
+    addRut: {
+        type: String,
+        required: [true, 'Please enter your rut'],
+    },
 });
 
 

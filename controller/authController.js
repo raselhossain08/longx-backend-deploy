@@ -3,44 +3,44 @@ const User = require('../models/User');
 const ErrorHandler = require('../utils/errorHandler');
 const sendEmail = require('../utils/sendEmail');
 const catchAsyncErrors = require('../middleware/catchAsyncErrors');
-const sendToken =require('../utils/jwtToken');
+const sendToken = require('../utils/jwtToken');
 // register  api
-exports.registerUser =catchAsyncErrors(async(req,res,next)=>{
-    const { name, email, password,phone,role} =req.body
-    const user =await User.create({
+exports.registerUser = catchAsyncErrors(async (req, res, next) => {
+    const { name, email, password, phone, role } = req.body
+    const user = await User.create({
         name,
         email,
         password,
         phone,
         role
     })
-    sendToken(user,200,res)
+    sendToken(user, 200, res)
     console.log(token)
 });
 // Login User => login
 
-exports.login =catchAsyncErrors(async(req,res,next)=>{
-    const {  email, password} =req.body
-    
+exports.login = catchAsyncErrors(async (req, res, next) => {
+    const { email, password } = req.body
+
     // check if email and password is entered by user
-    if(!email || !password) {
-        return next(new ErrorHandler("please enter your & password",400));
+    if (!email || !password) {
+        return next(new ErrorHandler("please enter your & password", 400));
     }
     // Finding user in database
-    const user = await User.findOne({email}).select('+password')
-    if(!user){
+    const user = await User.findOne({ email }).select('+password')
+    if (!user) {
         return next(new ErrorHandler('Invalid Email or Password', 401))
     }
 
     // Checks if password is correct or not
     const isPasswordMatched = await user.comparePassword(password)
-    if(!isPasswordMatched){
-        return next(new ErrorHandler('Invalid Email or Password',401))
+    if (!isPasswordMatched) {
+        return next(new ErrorHandler('Invalid Email or Password', 401))
     }
-    sendToken(user,200,res)
+    sendToken(user, 200, res)
 });
 // profile
-exports.profile =catchAsyncErrors(async(req,res,next)=>{
+exports.profile = catchAsyncErrors(async (req, res, next) => {
     res.json(req.user);
 })
 
@@ -59,12 +59,12 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
         // 2. Generate reset token
         const resetToken = user.generateResetPasswordToken();
-        
+
         // 3. Save user with reset token and expiry date
         await user.save({ validateBeforeSave: false });
 
         // 4. Create reset password URL
-        const resetUrl = `http://localhost:4200/password/reset/${resetToken}`;
+        const resetUrl = `${process.env.RESET_PASS}/password/reset/${resetToken}`;
 
         // 5. Compose email message
         const message = `Your password reset token is as follows:\n\n${resetUrl}\n\nIf you have not requested this email, please ignore it.`;
@@ -134,18 +134,18 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
 
 // logout user 
 
-exports.logout =catchAsyncErrors(async(req,res,next)=>{
+exports.logout = catchAsyncErrors(async (req, res, next) => {
     res.cookie('token', null, {
-        expires:new Date(Date.now()),
-        httpOnly:true
+        expires: new Date(Date.now()),
+        httpOnly: true
     })
     res.status(200).json({
-        success:true,
-        message:"logged out"
+        success: true,
+        message: "logged out"
     })
 });
 // get user information
-exports.getUser =catchAsyncErrors (async (req, res) => {
+exports.getUser = catchAsyncErrors(async (req, res) => {
     try {
         const userId = req.params.userId;
 
@@ -164,7 +164,7 @@ exports.getUser =catchAsyncErrors (async (req, res) => {
 });
 // update user
 // Update user details by ID
-exports.userInfoUpdate =catchAsyncErrors(async(req,res,next)=>{
+exports.userInfoUpdate = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.userId;
         const updateFields = req.body;
@@ -182,7 +182,7 @@ exports.userInfoUpdate =catchAsyncErrors(async(req,res,next)=>{
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-exports.updatePassword=catchAsyncErrors( async(req,res,next)=>{
+exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
     try {
         const { currentPassword, newPassword } = req.body;
 
